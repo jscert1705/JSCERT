@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제이에스인증원 - 기업 인증 및 경영 컨설팅 전문가</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("MF2y2eXILifq-imbo"); 
+        })();
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; scroll-behavior: smooth; }
+        
+        .hero-section {
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
+            min-height: 75vh; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .hero-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(circle at center, black, transparent 90%);
+        }
+
+        .hero-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M-100 100 Q 150 -50 400 100 T 900 100' stroke='rgba(99, 102, 241, 0.1)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M-100 250 Q 200 100 500 250 T 1100 250' stroke='rgba(79, 70, 229, 0.08)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+            background-size: cover;
+            z-index: 0;
+        }
+
+        .floating-blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            z-index: 1;
+            filter: blur(80px);
+            animation: moveAround 25s infinite alternate ease-in-out;
+        }
+
+        @keyframes moveAround {
+            0% { transform: translate(-15%, -15%) scale(1); }
+            100% { transform: translate(25%, 15%) scale(1.1); }
+        }
+
+        .smooth-transition { transition: all 0.3s ease; }
+        .ai-chat-container { height: 400px; overflow-y: auto; }
+        .modal { transition: opacity 0.3s ease; }
+        .modal-content { transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1); }
+
+        #ai-consult-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        #ai-consult-content.active {
+            max-height: 1000px; 
+        }
+        .rotate-icon { transition: transform 0.3s ease; }
+        .rotate-icon.active { transform: rotate(180deg); }
+        
+        .modal-list-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 0.875rem; color: #4b5563; }
+        .modal-list-icon { color: #6366f1; margin-top: 4px; font-size: 0.75rem; }
+        .modal-step-badge { width: 1.5rem; height: 1.5rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-xl font-extrabold text-indigo-900 tracking-tighter">제이에스인증원</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8 text-sm font-semibold">
+                        <a href="#services" class="text-gray-600 hover:text-indigo-900">인증서비스</a>
+                        <a href="#ai-consult" class="text-indigo-600 hover:text-indigo-800">✨ AI 진단</a>
+                        <a href="#contact" class="bg-indigo-900 text-white px-6 py-2 rounded-lg hover:bg-indigo-800 smooth-transition shadow-sm">상담신청</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section pt-16">
+        <div class="hero-pattern"></div>
+        <div class="hero-lines"></div>
+        <div class="floating-blob" style="top: -100px; right: -100px;"></div>
+        <div class="floating-blob" style="bottom: -200px; left: -100px; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(255, 255, 255, 0) 70%);"></div>
+        
+        <div class="relative z-10 px-4 max-w-5xl py-20 md:py-32">
+            <div class="inline-flex items-center bg-white border border-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-bold mb-8 shadow-sm">
+                <span class="flex h-2 w-2 rounded-full bg-indigo-500 mr-2 animate-pulse"></span>
+                PREMIUM CORPORATE CONSULTING INSTITUTE
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.15] mb-8 text-slate-900 tracking-tight text-center">
+                기업의 성장을 증명하는 <br> 
+                <span class="text-indigo-600">가장 완벽한 파트너십</span>
+            </h1>
+            <p class="text-base md:text-lg text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed font-medium text-center">
+                메인비즈 · 이노비즈 · 벤처기업확인 · 기업부설연구소 · ISO인증 · 환경표지인증까지 <br class="hidden sm:block"> 
+                귀사의 비즈니스 가치를 증명하고, 그 혜택을 유지하기 위한 특별한 인증을 추가하세요. <br class="hidden sm:block"> 
+                복잡한 서류부터 최종 승인까지 100% 성공을 향한 가장 친절한 가이드가 되어드립니다.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#ai-consult" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-bold text-lg smooth-transition shadow-lg shadow-indigo-200 hover:-translate-y-1">
+                    ✨ AI 맞춤형 인증 진단
+                </a>
+                <a href="#services" class="bg-white hover:bg-slate-50 text-indigo-900 border border-slate-200 px-8 py-4 rounded-xl font-bold text-lg smooth-transition shadow-sm hover:-translate-y-1">
+                    주요 제도 알아보기
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section id="services" class="py-24 bg-white text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl font-bold mb-4 text-slate-900">핵심 혁신인증 안내</h2>
+                <p class="text-slate-500">귀사의 현재 상황에 맞는 최적의 인증 제도를 확인해보세요.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 메인비즈 -->
+                <div onclick="openModal('mainbizModal')" class="p-8 border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl smooth-transition bg-white cursor-pointer group hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 smooth-transition"><i class="fas fa-chart-line text-2xl"></i></div>
+                    <h3 class="text-xl font-bold mb-3">메인비즈(경영혁신형 중소기업)</h3>
+                    <p class="text-slate-500 leading-relaxed text-sm h-12">경영혁신형 중소기업을 위한 비기술 혁신 인증</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <span class="text-emerald-600 text-xs font-bold uppercase tracking-wider">상세보기</span>
+                        <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-emerald-600"></i>
+                    </div>
+                </div>
+                <!-- 이노비즈 -->
+                <div onclick="openModal('innobizModal')" class="p-8 border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl smooth-transition bg-white cursor-pointer group hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 smooth-transition"><i class="fas fa-lightbulb text-2xl"></i></div>
+                    <h3 class="text-xl font-bold mb-3">이노비즈(기술혁신형 중소기업)</h3>
+                    <p class="text-slate-500 leading-relaxed text-sm h-12">기술 경쟁력을 갖춘 R&D 중심 기술혁신인증</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">상세보기</span>
+                        <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-blue-600"></i>
+                    </div>
+                </div>
+                <!-- 벤처기업확인 -->
+                <div onclick="openModal('ventureModal')" class="p-8 border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl smooth-transition bg-white cursor-pointer group hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 smooth-transition"><i class="fas fa-seedling text-2xl"></i></div>
+                    <h3 class="text-xl font-bold mb-3">벤처기업 확인</h3>
+                    <p class="text-slate-500 leading-relaxed text-sm h-12">민간 주도의 혁신성장형 기업 확인 제도</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <span class="text-purple-600 text-xs font-bold uppercase tracking-wider">상세보기</span>
+                        <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-purple-600"></i>
+                    </div>
+                </div>
+                <!-- 기업부설연구소 설립 -->
+                <div onclick="openModal('labModal')" class="p-8 border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl smooth-transition bg-white cursor-pointer group hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 smooth-transition"><i class="fas fa-flask text-2xl"></i></div>
+                    <h3 class="text-xl font-bold mb-3">기업부설연구소/전담부서 설립</h3>
+                    <p class="text-slate-500 leading-relaxed text-sm h-12">R&D 세액공제 25% 확보를 위한 필수 과정</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <span class="text-indigo-600 text-xs font-bold uppercase tracking-wider">상세보기</span>
+                        <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-indigo-600"></i>
+                    </div>
+                </div>
+                <!-- ISO인증 -->
+                <div onclick="openModal('isoModal')" class="p-8 border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl smooth-transition bg-white cursor-pointer group hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 smooth-transition"><i class="fas fa-globe text-2xl"></i></div>
+                    <h3 class="text-xl font-bold mb-3">ISO 인증</h3>
+                    <p class="text-slate-500 leading-relaxed text-sm h-12">9001, 14001, 45001 등 국제 표준 품질 시스템</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <span class="text-amber-600 text-xs font-bold uppercase tracking-wider">상세보기</span>
+                        <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-amber-600"></i>
+                    </div>
+                </div>
+                <!-- 환경표지 -->
+                <div onclick="openModal('ecoModal')" class="p-8 border border-slate-100 rounded-2xl shadow-sm hover:shadow-xl smooth-transition bg-white cursor-pointer group hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 smooth-transition"><i class="fas fa-leaf text-2xl"></i></div>
+                    <h3 class="text-xl font-bold mb-3">환경표지 인증</h3>
+                    <p class="text-slate-500 leading-relaxed text-sm h-12">친환경 제품의 가치를 국가가 공식 인증</p>
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <span class="text-green-600 text-xs font-bold uppercase tracking-wider">상세보기</span>
+                        <i class="fas fa-chevron-right text-xs text-slate-300 group-hover:text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <!-- 메인비즈 Modal -->
+    <div id="mainbizModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto text-left">
+            <div class="bg-emerald-600 p-6 flex justify-between items-center text-white sticky top-0 z-10">
+                <h3 class="text-xl font-bold">메인비즈 (Main-Biz) 인증 안내</h3>
+                <button onclick="closeModal('mainbizModal')" class="hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center text-2xl">&times;</button>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-emerald-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-emerald-100 text-emerald-700">1</span>제도개요
+                    </h4>
+                    <p class="text-slate-600 text-sm leading-relaxed pl-8">Management(경영), Innovation(혁신), Business(기업)의 합성어로 중소벤처기업부로부터 경영혁신 역량을 갖춘 기업으로 인증받는 제도입니다. 비기술 분야의 혁신을 장려합니다.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-emerald-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-emerald-100 text-emerald-700">2</span>신청절차
+                    </h4>
+                    <div class="pl-8 flex flex-wrap gap-2 text-xs">
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">온라인 자가진단</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">현장평가 신청</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">전문기관 실사</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">인증서 발급</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-emerald-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-emerald-100 text-emerald-700">3</span>신청요건
+                    </h4>
+                    <ul class="pl-8 space-y-1">
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 설립 후 만 3년 이상인 중소기업 (개인사업자 포함)</li>
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 경영혁신 시스템 평가지표 700점 이상 (자가진단 기준 600점 이상이면 신청 가능)</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-emerald-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-emerald-100 text-emerald-700">4</span>혜택
+                    </h4>
+                    <div class="pl-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                        <div class="modal-list-item"><i class="fas fa-star modal-list-icon"></i> 금융: 금리 우대 및 보증료율 차감</div>
+                        <div class="modal-list-item"><i class="fas fa-star modal-list-icon"></i> 세무: 국세청 정기 세무조사 유예</div>
+                        <div class="modal-list-item"><i class="fas fa-star modal-list-icon"></i> 판로: 공공기관 입찰 시 가점 부여</div>
+                        <div class="modal-list-item"><i class="fas fa-star modal-list-icon"></i> 인력: 병역특례 업체 지정 시 가점</div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-emerald-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-emerald-100 text-emerald-700">5</span>컨설팅내용
+                    </h4>
+                    <div class="pl-8 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <p class="text-sm text-emerald-900 font-medium">업종별 평가지표 작성 및 현장평가를 대비한 준비</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('mainbizModal')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 이노비즈 Modal -->
+    <div id="innobizModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto text-left">
+            <div class="bg-blue-600 p-6 flex justify-between items-center text-white sticky top-0 z-10">
+                <h3 class="text-xl font-bold">이노비즈 (Inno-Biz) 인증 안내</h3>
+                <button onclick="closeModal('innobizModal')" class="hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center text-2xl">&times;</button>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-blue-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-blue-100 text-blue-700">1</span>제도개요
+                    </h4>
+                    <p class="text-slate-600 text-sm leading-relaxed pl-8">INNOVATION(혁신)과 BUSINESS(기업)의 합성어로 기술 우위를 바탕으로 경쟁력을 확보한 '기술혁신형 중소기업'임을 인증하는 제도입니다.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-blue-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-blue-100 text-blue-700">2</span>신청절차
+                    </h4>
+                    <div class="pl-8 flex flex-wrap gap-2 text-xs">
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">온라인 자가진단</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">현장실사 신청</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">기술보증기금 평가</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">최종 확정</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-blue-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-blue-100 text-blue-700">3</span>신청요건
+                    </h4>
+                    <ul class="pl-8 space-y-1">
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 업력 3년 이상의 중소기업 (제조업, S/W, 서비스업 등)</li>
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 기술혁신 시스템 평가 700점 이상 및 개별기술지표 B등급 이상</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-blue-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-blue-100 text-blue-700">4</span>혜택
+                    </h4>
+                    <div class="pl-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                        <div class="modal-list-item"><i class="fas fa-gift modal-list-icon"></i> 기보 보증료율 감면 및 한도 우대</div>
+                        <div class="modal-list-item"><i class="fas fa-gift modal-list-icon"></i> 정부 출연 R&D 과제 신청 가점</div>
+                        <div class="modal-list-item"><i class="fas fa-gift modal-list-icon"></i> 특허청 우선심사 대상 지정</div>
+                        <div class="modal-list-item"><i class="fas fa-gift modal-list-icon"></i> 글로벌 강소기업 육성사업 가점</div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-blue-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-blue-100 text-blue-700">5</span>컨설팅내용
+                    </h4>
+                    <div class="pl-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <p class="text-sm text-blue-900 font-medium">기술사업계획서 및 평가지표 작성, 현장 기술평가 증빙 준비</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('innobizModal')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 벤처기업확인 Modal -->
+    <div id="ventureModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto text-left">
+            <div class="bg-purple-600 p-6 flex justify-between items-center text-white sticky top-0 z-10">
+                <h3 class="text-xl font-bold">벤처기업확인제도 안내</h3>
+                <button onclick="closeModal('ventureModal')" class="hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center text-2xl">&times;</button>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-purple-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-purple-100 text-purple-700">1</span>제도개요
+                    </h4>
+                    <p class="text-slate-600 text-sm leading-relaxed pl-8">민간 전문가 중심의 '벤처기업확인위원회'가 기업의 혁신성과 성장성을 평가하여 벤처기업 여부를 확인해 주는 제도입니다.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-purple-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-purple-100 text-purple-700">2</span>신청절차
+                    </h4>
+                    <div class="pl-8 flex flex-wrap gap-2 text-xs">
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">유형 선택</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">온라인 신청</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">현장 방문 평가</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">최종 결과 통보</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-purple-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-purple-100 text-purple-700">3</span>신청요건
+                    </h4>
+                    <ul class="pl-8 space-y-1">
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 기술의 혁신성 (특허 보유, 연구개발 투자 등)</li>
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 사업의 성장성 (시장 점유율, 매출 증가 전망 등)</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-purple-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-purple-100 text-purple-700">4</span>혜택
+                    </h4>
+                    <div class="pl-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                        <div class="modal-list-item"><i class="fas fa-bolt modal-list-icon"></i> 법인세/소득세 50% 감면 (창업 벤처)</div>
+                        <div class="modal-list-item"><i class="fas fa-bolt modal-list-icon"></i> 취득세 75% 감면 및 재산세 감면</div>
+                        <div class="modal-list-item"><i class="fas fa-bolt modal-list-icon"></i> 기술보증기금 보증한도 확대 우대</div>
+                        <div class="modal-list-item"><i class="fas fa-bolt modal-list-icon"></i> 코스닥 상장 심사 기준 완화</div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-purple-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-purple-100 text-purple-700">5</span>컨설팅내용
+                    </h4>
+                    <div class="pl-8 p-4 bg-purple-50 rounded-xl border border-purple-100">
+                        <p class="text-sm text-purple-900 font-medium">유형별 최적 가이드 제시 및 사업계획서 고도화, 제출 서류 준비</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('ventureModal')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기업부설연구소 Modal -->
+    <div id="labModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto text-left">
+            <div class="bg-indigo-600 p-6 flex justify-between items-center text-white sticky top-0 z-10">
+                <h3 class="text-xl font-bold">기업부설연구소 / 전담부서 설립 안내</h3>
+                <button onclick="closeModal('labModal')" class="hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center text-2xl">&times;</button>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-indigo-100 text-indigo-700">1</span>제도개요
+                    </h4>
+                    <p class="text-slate-600 text-sm leading-relaxed pl-8">기업의 연구개발 역량을 높이기 위해 일정 요건을 갖춘 연구조직을 한국산업기술진흥협회(KOITA)에 신고하여 혜택을 받는 제도입니다.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-indigo-100 text-indigo-700">2</span>신청절차
+                    </h4>
+                    <div class="pl-8 flex flex-wrap gap-2 text-xs">
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">인적/물적 요건 정비</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">온라인 신고</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">서류 심사</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">인증서 발급</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-indigo-100 text-indigo-700">3</span>신청요건
+                    </h4>
+                    <ul class="pl-8 space-y-1">
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 연구전담요원 수 확보 (소기업 3인 이상, 중기업 5인 이상)</li>
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 독립된 연구 공간 (벽체 구분 및 출입문 설치 / 일정 요건시 50㎡ 이하인 파티션 공간 가능)</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-indigo-100 text-indigo-700">4</span>혜택
+                    </h4>
+                    <div class="pl-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                        <div class="modal-list-item"><i class="fas fa-coins modal-list-icon"></i> R&D 인건비/훈련비 25% 세액공제</div>
+                        <div class="modal-list-item"><i class="fas fa-coins modal-list-icon"></i> 연구용 기자재 수입 관세 80% 감면</div>
+                        <div class="modal-list-item"><i class="fas fa-coins modal-list-icon"></i> 병역특례(전문연구요원) 업체 지정 자격</div>
+                        <div class="modal-list-item"><i class="fas fa-coins modal-list-icon"></i> 국가 R&D 사업 참여 및 입찰 가점</div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-indigo-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-indigo-100 text-indigo-700">5</span>컨설팅내용
+                    </h4>
+                    <div class="pl-8 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                        <p class="text-sm text-indigo-900 font-medium">연구소 설립의 인적/물적 요건 진단, 제출 자료 정리 및 수정</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('labModal')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ISO Modal -->
+    <div id="isoModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto text-left">
+            <div class="bg-amber-600 p-6 flex justify-between items-center text-white sticky top-0 z-10">
+                <div class="flex items-center gap-2"><i class="fas fa-globe"></i><h3 class="text-xl font-bold">ISO 국제 표준 인증 안내</h3></div>
+                <button onclick="closeModal('isoModal')" class="hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center text-2xl">&times;</button>
+            </div>
+            <div class="p-8 space-y-10">
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-amber-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-amber-100 text-amber-700">1</span>제도개요
+                    </h4>
+                    <p class="text-slate-600 text-sm leading-relaxed pl-8">ISO 인증은 기업의 경영 시스템이 국제 규격에 부합함을 제3의 인증기관이 객관적으로 증명하는 제도입니다. 품질, 환경, 안전 등 다양한 표준 규격이 존재합니다.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="text-lg font-bold text-amber-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-amber-100 text-amber-700">2</span>주요 인증 규격
+                    </h4>
+                    <div class="pl-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col group hover:border-amber-500 transition-colors">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold">품질경영</span>
+                                <h5 class="font-bold text-slate-800">ISO 9001</h5>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-relaxed flex-grow">품질 시스템 구축 및 고객 만족 경영을 실천하는지 검증합니다.</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col group hover:border-green-500 transition-colors">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">환경경영</span>
+                                <h5 class="font-bold text-slate-800">ISO 14001</h5>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-relaxed flex-grow">환경에 미치는 영향을 최소화하는 경영 체계를 인증합니다.</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col group hover:border-blue-500 transition-colors">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">안전보건</span>
+                                <h5 class="font-bold text-slate-800">ISO 45001</h5>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-relaxed flex-grow">안전한 작업 환경 관리 시스템을 구축하는 인증입니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-amber-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-amber-100 text-amber-700">3</span>신청절차
+                    </h4>
+                    <div class="pl-8 flex flex-wrap gap-2 text-xs">
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">예비 진단</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">시스템 구축</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">인증 심사 (1, 2차)</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">인증서 등록</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-amber-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-amber-100 text-amber-700">4</span>기대효과
+                    </h4>
+                    <div class="pl-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                        <div class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 국내외 입찰 참가 및 협력업체 등록 시 필수 요건</div>
+                        <div class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 기업 대외 이미지 제고 및 고객 신뢰도 확보</div>
+                        <div class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 체계적인 경영 관리 프로세스 정착으로 비용 절감</div>
+                        <div class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 정부 정책자금 지원사업 신청 시 가점 및 우대</div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-amber-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-amber-100 text-amber-700">5</span>컨설팅내용
+                    </h4>
+                    <div class="pl-8 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                        <p class="text-sm text-amber-900 font-medium">ISO 매뉴얼 및 절차서 준비, ISO 업무 적용 가이드 및 인증심사 지원</p>
+                    </div>
+                </div>
+
+                <button onclick="closeModal('isoModal')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 환경표지 Modal -->
+    <div id="ecoModal" class="fixed inset-0 z-[100] hidden items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] overflow-y-auto text-left">
+            <div class="bg-green-600 p-6 flex justify-between items-center text-white sticky top-0 z-10">
+                <h3 class="text-xl font-bold">환경표지인증 (Eco-Label) 안내</h3>
+                <button onclick="closeModal('ecoModal')" class="hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center text-2xl">&times;</button>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-green-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-green-100 text-green-700">1</span>제도개요
+                    </h4>
+                    <p class="text-slate-600 text-sm leading-relaxed pl-8">제품의 '환경성'을 개선한 제품에 로고를 표시함으로써 친환경 제품 개발을 유도하는 자발적 인증 제도입니다.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-green-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-green-100 text-green-700">2</span>인증절차
+                    </h4>
+                    <div class="pl-8 flex flex-wrap gap-2 text-xs">
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">인증신청 및 접수</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">서류/현장 심사</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">심의위원회 심의</span>
+                        <i class="fas fa-arrow-right self-center text-slate-300"></i>
+                        <span class="bg-slate-50 px-3 py-1.5 border rounded-lg">인증서 발급</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-green-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-green-100 text-green-700">3</span>신청요건
+                    </h4>
+                    <ul class="pl-8 space-y-1">
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 대상 품목군에 해당하는 제품을 제조/판매하는 기업</li>
+                        <li class="modal-list-item"><i class="fas fa-check modal-list-icon"></i> 각 품목별 환경기준 및 품질기준 준수 여부</li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-green-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-green-100 text-green-700">4</span>혜택
+                    </h4>
+                    <div class="pl-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                        <div class="modal-list-item"><i class="fas fa-leaf modal-list-icon"></i> 공공기관 의무구매 대상 지정 (녹색제품)</div>
+                        <div class="modal-list-item"><i class="fas fa-leaf modal-list-icon"></i> 조달청 입찰 시 가산점 및 가점 부여</div>
+                        <div class="modal-list-item"><i class="fas fa-leaf modal-list-icon"></i> 환경 기술 개발 지원사업 참여 시 가점</div>
+                        <div class="modal-list-item"><i class="fas fa-leaf modal-list-icon"></i> 기업 브랜드 가치 및 친환경 이미지 제고</div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-lg font-bold text-green-700 flex items-center gap-2">
+                        <span class="modal-step-badge bg-green-100 text-green-700">5</span>컨설팅내용
+                    </h4>
+                    <div class="pl-8 p-4 bg-green-50 rounded-xl border border-green-100">
+                        <p class="text-sm text-green-900 font-medium">해당 인증기준에 맞는 제출서류 및 공인인증기관 시험의뢰 가이드</p>
+                    </div>
+                </div>
+
+                <button onclick="closeModal('ecoModal')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">확인 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Consultation Section -->
+    <section id="ai-consult" class="py-16 bg-slate-50 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <button onclick="toggleAIConsult()" class="w-full flex flex-col items-center group">
+                <h2 class="text-3xl font-bold text-indigo-900 tracking-tight flex items-center gap-3">
+                    ✨ 간편하게 받아보는 인증 추천 
+                    <i id="toggle-icon" class="fas fa-chevron-down text-lg text-indigo-400 rotate-icon"></i>
+                </h2>
+                <p class="mt-2 text-slate-500 mb-4 group-hover:text-indigo-600 transition">기업 정보를 입력하고 적합한 인증을 진단받으세요. (클릭하여 열기)</p>
+            </button>
+            <div id="ai-consult-content" class="mt-6">
+                <div id="chatHistory" class="ai-chat-container p-6 bg-white rounded-3xl mb-4 text-left border border-slate-100 shadow-sm">
+                    <div class="mb-4 text-left"><div class="inline-block bg-indigo-50 text-indigo-700 p-4 rounded-2xl shadow-sm text-sm font-medium">반갑습니다! 귀사의 업종과 업력을 말씀해주시면 분석해 드리겠습니다.</div></div>
+                </div>
+                <div class="flex gap-2 p-1">
+                    <input type="text" id="userInput" class="flex-1 px-5 py-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm" placeholder="예: 5년차 금속가공업 중소기업입니다.">
+                    <button onclick="askGemini()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-bold smooth-transition shadow-md shadow-indigo-100">진단하기</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form -->
+    <section id="contact" class="py-24 bg-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4 text-indigo-900">전문가 1:1 상담</h2>
+            <p class="text-slate-500 mb-10">상담 신청을 남겨주시면 담당 전문가가 24시간 내에 연락드립니다.</p>
+            <form id="contactForm" class="bg-slate-50 p-8 md:p-12 rounded-[2rem] text-left space-y-6 border border-slate-100 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700 ml-1">성함/직함</label>
+                        <input type="text" id="from_name" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none" placeholder="홍길동 대표">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700 ml-1">연락처</label>
+                        <input type="text" id="contact_number" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none" placeholder="010-0000-0000">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700 ml-1">회신받을 이메일</label>
+                        <input type="email" id="reply_email" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none" placeholder="example@email.com">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700 ml-1">관심 분야</label>
+                        <select id="interest_service" class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none bg-white font-medium">
+                            <option value="메인비즈">메인비즈 (경영혁신)</option>
+                            <option value="이노비즈">이노비즈 (기술혁신)</option>
+                            <option value="벤처기업">벤처기업 확인</option>
+                            <option value="기업부설연구소">기업부설연구소 설립</option>
+                            <option value="ISO인증">ISO 인증</option>
+                            <option value="환경표지">환경표지 인증</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700 ml-1">상세 상담 내용</label>
+                    <textarea id="consult_message" rows="4" class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none" placeholder="궁금하신 내용을 입력해주세요."></textarea>
+                </div>
+                <button type="submit" id="submitBtn" class="w-full bg-indigo-900 hover:bg-indigo-800 text-white py-4 rounded-xl font-bold text-lg shadow-lg smooth-transition">상담 신청 접수</button>
+            </form>
+            <div id="successMsg" class="hidden mt-6 p-5 bg-green-50 text-green-700 rounded-2xl font-bold border border-green-100 text-center">상담 신청이 완료되었습니다! 신속히 연락드리겠습니다.</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 bg-slate-900 text-slate-400 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col items-center md:items-start">
+                    <div class="text-white font-extrabold text-base tracking-tighter uppercase mb-1">제이에스인증원</div>
+                    <p class="text-[12px] md:text-xs leading-relaxed text-center md:text-left">
+                        <span class="inline-block"><i class="fas fa-map-marker-alt mr-1 text-indigo-400"></i>경기도 성남시 분당구 정자일로 177 A동 1211호 (인텔리지2, 정자동)</span>
+                        <span class="hidden md:inline mx-2 text-slate-700">|</span>
+                        <span class="inline-block mt-1 md:mt-0">Tel. 010-4187-2167</span>
+                    </p>
+                </div>
+                <div class="text-[11px] md:text-xs text-slate-500">
+                    © 2017-2026 JS Certification Institute. All Rights Reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const apiKey = ""; 
+
+        function toggleAIConsult() {
+            const content = document.getElementById('ai-consult-content');
+            const icon = document.getElementById('toggle-icon');
+            content.classList.toggle('active');
+            icon.classList.toggle('active');
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if(modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex', 'active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if(modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex', 'active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        document.getElementById('contactForm').onsubmit = function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerText = "접수 중...";
+            
+            const params = {
+                from_name: document.getElementById('from_name').value,
+                contact_number: document.getElementById('contact_number').value,
+                reply_email: document.getElementById('reply_email').value,
+                interest_service: document.getElementById('interest_service').value,
+                message: document.getElementById('consult_message').value || "상세 내용 없음"
+            };
+            
+            emailjs.send('jscert', 'template_m90odbf', params)
+                .then(() => {
+                    document.getElementById('contactForm').classList.add('hidden');
+                    document.getElementById('successMsg').classList.remove('hidden');
+                }, (err) => {
+                    alert("오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                    btn.disabled = false; btn.innerText = "상담 신청 접수";
+                });
+        };
+
+        async function askGemini() {
+            const input = document.getElementById('userInput');
+            const chat = document.getElementById('chatHistory');
+            if (!input.value) return;
+            const userMsg = input.value;
+            chat.innerHTML += `<div class="mb-4 text-right"><span class="bg-indigo-600 text-white px-4 py-2 rounded-2xl inline-block shadow-sm text-sm">${userMsg}</span></div>`;
+            input.value = '';
+            
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userMsg }] }],
+                        systemInstruction: { parts: [{ text: "당신은 한국의 기업 인증 전문가입니다. 메인비즈, 이노비즈, 벤처기업, 기업부설연구소 등의 차이와 혜택을 명확히 설명하세요." }] }
+                    })
+                });
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "답변을 생성하지 못했습니다.";
+                chat.innerHTML += `<div class="mb-4 text-left"><div class="inline-block bg-indigo-50 border border-indigo-100 p-4 rounded-2xl shadow-sm whitespace-pre-wrap text-sm text-indigo-900">${text}</div></div>`;
+            } catch (e) {
+                chat.innerHTML += `<div class="text-red-500 text-xs">연결 오류</div>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+</html>
