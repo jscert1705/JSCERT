@@ -1,2 +1,4 @@
 User-agent: *
 Allow:/
+
+Sitemap: [https://www.jscert.kr/sitemap.xml](https://www.jscert.kr/sitemap.xml)
