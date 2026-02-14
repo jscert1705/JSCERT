@@ -12,7 +12,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <style>
-        /* IBM Plex Sans KR: 글로벌 비즈니스 표준의 명확함 (OFL 라이선스) */
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@100;300;400;500;600;700&display=swap');
         
         :root {
@@ -30,7 +29,26 @@
             letter-spacing: -0.025em;
         }
 
-        /* 부드러운 등장 애니메이션 */
+        /* 히어로 섹션 다크 테마 */
+        .hero-dark {
+            background-color: var(--brand-navy);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 명함 스타일의 거대 기울어진 로고 워터마크 */
+        .bg-watermark {
+            position: absolute;
+            top: 50%;
+            left: 55%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            width: 120%;
+            max-width: 1000px;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .reveal { 
             opacity: 0; 
             transform: translateY(20px); 
@@ -41,7 +59,6 @@
             transform: translateY(0); 
         }
 
-        /* AI 섹션 아코디언 */
         #ai-consult-container {
             max-height: 0;
             overflow: hidden;
@@ -51,144 +68,206 @@
             max-height: 1000px; 
         }
 
-        /* 구조적 카드 디자인 */
+        /* 서비스 카드 디자인 - 워터마크 추가 버전 */
         .service-card {
             transition: all 0.3s ease;
             border: 1px solid #f1f5f9;
             background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+            overflow: hidden; /* 워터마크가 카드 밖으로 나가지 않도록 설정 */
         }
         .service-card:hover {
             border-color: var(--brand-blue);
-            transform: translateY(-6px);
-            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.05);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.08);
         }
 
-        /* 커스텀 스크롤바 */
+        /* 카드 내부 워터마크 스타일 */
+        .card-watermark {
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            font-size: 5rem;
+            opacity: 0.05;
+            transform: rotate(-15deg);
+            pointer-events: none;
+            z-index: 0;
+            transition: all 0.3s ease;
+        }
+        .service-card:hover .card-watermark {
+            opacity: 0.08;
+            transform: rotate(-10deg) scale(1.1);
+        }
+
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        /* 모달 세부 스타일 */
-        .info-section { margin-bottom: 2rem; }
-        .info-title { font-weight: 700; font-size: 1.1rem; color: var(--brand-navy); margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; display: flex; align-items: center; gap: 8px; }
-        .info-title i { color: var(--brand-blue); font-size: 0.9rem; }
-        .info-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.6rem; font-size: 0.95rem; color: #475569; line-height: 1.6; }
-        .info-list li::before { content: "→"; position: absolute; left: 0; color: var(--brand-blue); font-weight: bold; }
+        /* 모달 스타일 상세화 */
+        .info-section { margin-bottom: 2.5rem; }
+        .info-title { font-weight: 700; font-size: 1.15rem; color: var(--brand-navy); margin-bottom: 1.2rem; border-bottom: 2px solid var(--brand-blue); padding-bottom: 0.6rem; display: flex; align-items: center; gap: 10px; width: fit-content; }
+        .info-title i { color: var(--brand-blue); font-size: 1rem; }
+        .info-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.7rem; font-size: 0.95rem; color: #475569; line-height: 1.7; }
+        .info-list li::before { content: "•"; position: absolute; left: 0.4rem; color: var(--brand-blue); font-weight: bold; }
+        .sub-list { margin-top: 0.5rem; padding-left: 0.5rem; }
+        .sub-list li { font-size: 0.9rem; color: #64748b; margin-bottom: 0.3rem; }
+        .sub-list li::before { content: "-"; color: #94a3b8; margin-right: 8px; }
+
+        #custom-alert {
+            display: none;
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
+    <!-- Custom Alert UI -->
+    <div id="custom-alert" class="px-6 py-4 rounded-2xl shadow-2xl bg-white border border-slate-100 flex items-center gap-4 min-w-[300px]">
+        <div id="alert-icon" class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-50 text-blue-600">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="flex-1">
+            <p id="alert-message" class="text-sm font-bold text-slate-800"></p>
+        </div>
+        <button onclick="hideAlert()" class="text-slate-300 hover:text-slate-600">&times;</button>
+    </div>
+
     <!-- Navigation -->
-    <nav class="fixed w-full z-[100] bg-white/95 backdrop-blur-sm border-b border-slate-100">
+    <nav class="fixed w-full z-[100] bg-[#0f172a]/80 backdrop-blur-md border-b border-white/5">
         <div class="max-w-7xl mx-auto px-6 lg:px-10">
             <div class="flex justify-between h-20 items-center">
                 <a href="#" class="flex items-center gap-4 group">
                     <div class="w-10 h-10 relative flex items-center justify-center">
                         <svg viewBox="0 0 100 100" class="w-full h-full transition-transform group-hover:scale-105">
-                            <path d="M35 25 V60 C35 72 25 72 20 68" fill="none" stroke="#0f172a" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M35 25 V60 C35 72 25 72 20 68" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/>
                             <path d="M80 35 C80 22 45 22 45 35 C45 42 80 45 80 60 C80 75 45 75 35 65" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round"/>
                         </svg>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-xl font-bold text-[#0f172a] tracking-tighter">제이에스인증원</span>
+                        <span class="text-xl font-bold text-white tracking-tighter">제이에스인증원</span>
                         <span class="text-[8px] font-semibold text-slate-400 tracking-[0.3em] uppercase">JS CERTIFICATION INSTITUTE</span>
                     </div>
                 </a>
-                <div class="hidden lg:flex items-center space-x-12 text-[13px] font-semibold text-slate-500">
-                    <a href="#services" class="hover:text-blue-600 transition">인증서비스</a>
-                    <a href="#ai-consult-anchor" class="text-blue-600 font-bold">AI 맞춤진단</a>
-                    <a href="#contact" class="bg-[#0f172a] text-white px-7 py-2.5 rounded-lg hover:bg-black transition text-sm">상담신청</a>
+                <div class="hidden lg:flex items-center space-x-12 text-[13px] font-semibold text-slate-300">
+                    <a href="#services" class="hover:text-blue-400 transition">인증서비스</a>
+                    <a href="#ai-consult-anchor" class="text-blue-400 font-bold">AI 맞춤진단</a>
+                    <a href="#contact" class="bg-blue-600 text-white px-7 py-2.5 rounded-lg hover:bg-blue-500 transition text-sm shadow-md">상담신청</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="min-h-[85vh] flex items-center justify-center pt-20 bg-white">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-full text-[10px] font-bold uppercase tracking-widest mb-10 reveal">
+    <section class="min-h-screen flex items-center justify-center pt-20 hero-dark">
+        <div class="bg-watermark">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <path d="M35 25 V60 C35 72 25 72 20 68" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+                <path d="M80 35 C80 22 45 22 45 35 C45 42 80 45 80 60 C80 75 45 75 35 65" fill="none" stroke="#3b82f6" stroke-width="10" stroke-linecap="round"/>
+            </svg>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/5 text-blue-400 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest mb-10 reveal">
                 Trusted Excellence in Certification
             </div>
-            <h1 class="text-5xl md:text-7.5xl font-bold text-[#0f172a] leading-[1.1] mb-10 tracking-tighter reveal">
+            <h1 class="text-5xl md:text-7.5xl font-bold text-white leading-[1.1] mb-10 tracking-tighter reveal">
                 혁신의 가치를<br>
-                <span class="text-blue-600">성장의 증명으로 바꿉니다</span>
+                <span class="text-blue-500">성장의 증명으로 바꿉니다</span>
             </h1>
             <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-14 font-light leading-relaxed reveal" style="transition-delay: 0.1s">
                 제이에스인증원은 기업이 보유한 기술과 성과를 객관적인 가치로 증명하여,<br>
                 성공적인 비즈니스 확장을 위한 최적의 로드맵을 설계합니다.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal" style="transition-delay: 0.2s">
-                <a href="#ai-consult-anchor" class="w-full sm:w-auto bg-[#0f172a] text-white px-12 py-4.5 rounded-xl font-bold text-lg hover:bg-black transition shadow-lg">
+                <a href="#ai-consult-anchor" class="w-full sm:w-auto bg-blue-600 text-white px-12 py-4.5 rounded-xl font-bold text-lg hover:bg-blue-500 transition shadow-xl text-center">
                     ✨ AI 기업진단 시작
                 </a>
-                <a href="#services" class="w-full sm:w-auto bg-white text-slate-500 border border-slate-200 px-12 py-4.5 rounded-xl font-bold text-lg hover:bg-slate-50 transition">
+                <a href="#services" class="w-full sm:w-auto bg-white/5 text-white border border-white/10 px-12 py-4.5 rounded-xl font-bold text-lg hover:bg-white/10 transition text-center">
                     인증 서비스 안내
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Services Grid -->
-    <section id="services" class="py-32 bg-slate-50/40">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-24 reveal">
-                <h2 class="text-3xl font-bold text-[#0f172a] mb-5">핵심 인증 영역</h2>
-                <div class="w-12 h-1 bg-blue-600 mx-auto"></div>
+    <!-- 핵심 인증 영역 -->
+    <section id="services" class="py-20 md:py-24 bg-slate-50/40">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl font-bold text-[#0f172a] mb-4 tracking-tight">핵심 인증 영역</h2>
+                <div class="w-12 h-0.5 bg-blue-600 mx-auto"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div onclick="openModal('mainbiz')" class="service-card p-12 rounded-[2.5rem] cursor-pointer reveal">
-                    <div class="w-12 h-12 text-blue-600 mb-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 메인비즈 -->
+                <div onclick="openModal('mainbiz')" class="service-card p-8 rounded-3xl cursor-pointer reveal">
+                    <div class="card-watermark"><i class="fas fa-chart-line"></i></div>
+                    <div class="w-10 h-10 text-blue-600 mb-6 relative z-10">
                         <i class="fas fa-chart-line text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-[#0f172a]">메인비즈</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-10 font-light">경영혁신형 중소기업 인증으로 효율적인 경영 시스템을 공식 인정받으세요.</p>
-                    <span class="text-blue-600 text-xs font-bold tracking-widest uppercase flex items-center gap-2">View Detail <i class="fas fa-arrow-right text-[10px]"></i></span>
+                    <h3 class="text-xl font-bold mb-3 text-[#0f172a] relative z-10">메인비즈</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed font-light relative z-10">비기술 분야의 경영 혁신 활동을 평가받아 국가적 우대 혜택을 받으세요.</p>
                 </div>
 
-                <div onclick="openModal('innobiz')" class="service-card p-12 rounded-[2.5rem] cursor-pointer reveal" style="transition-delay: 0.05s">
-                    <div class="w-12 h-12 text-blue-600 mb-10">
+                <!-- 이노비즈 -->
+                <div onclick="openModal('innobiz')" class="service-card p-8 rounded-3xl cursor-pointer reveal" style="transition-delay: 0.05s">
+                    <div class="card-watermark"><i class="fas fa-rocket"></i></div>
+                    <div class="w-10 h-10 text-blue-600 mb-6 relative z-10">
                         <i class="fas fa-rocket text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-[#0f172a]">이노비즈</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-10 font-light">기술 우위를 바탕으로 성장이 유망한 기술혁신형 중소기업임을 증명합니다.</p>
-                    <span class="text-blue-600 text-xs font-bold tracking-widest uppercase flex items-center gap-2">View Detail <i class="fas fa-arrow-right text-[10px]"></i></span>
+                    <h3 class="text-xl font-bold mb-3 text-[#0f172a] relative z-10">이노비즈</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed font-light relative z-10">기술 우위를 바탕으로 글로벌 경쟁력을 확보한 기술혁신형 중소기업 인증입니다.</p>
                 </div>
 
-                <div onclick="openModal('venture')" class="service-card p-12 rounded-[2.5rem] cursor-pointer reveal" style="transition-delay: 0.1s">
-                    <div class="w-12 h-12 text-blue-600 mb-10">
+                <!-- 벤처기업 -->
+                <div onclick="openModal('venture')" class="service-card p-8 rounded-3xl cursor-pointer reveal" style="transition-delay: 0.1s">
+                    <div class="card-watermark"><i class="fas fa-gem"></i></div>
+                    <div class="w-10 h-10 text-blue-600 mb-6 relative z-10">
                         <i class="fas fa-gem text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-[#0f172a]">벤처기업 확인</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-10 font-light">기술의 혁신성과 사업화 가능성을 인정받아 압도적인 세제 혜택을 누리십시오.</p>
-                    <span class="text-blue-600 text-xs font-bold tracking-widest uppercase flex items-center gap-2">View Detail <i class="fas fa-arrow-right text-[10px]"></i></span>
+                    <h3 class="text-xl font-bold mb-3 text-[#0f172a] relative z-10">벤처기업 확인</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed font-light relative z-10">독보적인 기술력과 성장 가능성을 인정받아 압도적인 세제 혜택을 누리십시오.</p>
                 </div>
 
-                <div onclick="openModal('lab')" class="service-card p-12 rounded-[2.5rem] cursor-pointer reveal">
-                    <div class="w-12 h-12 text-blue-600 mb-10">
+                <!-- 기업부설연구소 -->
+                <div onclick="openModal('lab')" class="service-card p-8 rounded-3xl cursor-pointer reveal">
+                    <div class="card-watermark"><i class="fas fa-microscope"></i></div>
+                    <div class="w-10 h-10 text-blue-600 mb-6 relative z-10">
                         <i class="fas fa-microscope text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-[#0f172a]">기업부설연구소</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-10 font-light">연구개발 투자를 세액공제로 환원받는 기업 성장의 필수 법적 요건입니다.</p>
-                    <span class="text-blue-600 text-xs font-bold tracking-widest uppercase flex items-center gap-2">View Detail <i class="fas fa-arrow-right text-[10px]"></i></span>
+                    <h3 class="text-xl font-bold mb-3 text-[#0f172a] relative z-10">기업부설연구소</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed font-light relative z-10">연구개발 활동을 공식 인정받아 법인세 감면과 전문 인력 지원을 확보합니다.</p>
                 </div>
 
-                <div onclick="openModal('iso')" class="service-card p-12 rounded-[2.5rem] cursor-pointer reveal" style="transition-delay: 0.05s">
-                    <div class="w-12 h-12 text-blue-600 mb-10">
+                <!-- ISO -->
+                <div onclick="openModal('iso')" class="service-card p-8 rounded-3xl cursor-pointer reveal" style="transition-delay: 0.05s">
+                    <div class="card-watermark"><i class="fas fa-globe"></i></div>
+                    <div class="w-10 h-10 text-blue-600 mb-6 relative z-10">
                         <i class="fas fa-globe text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-[#0f172a]">ISO 국제 인증</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-10 font-light">품질, 환경, 안전 등 글로벌 비즈니스 표준 시스템을 구축하여 신뢰를 높입니다.</p>
-                    <span class="text-blue-600 text-xs font-bold tracking-widest uppercase flex items-center gap-2">View Detail <i class="fas fa-arrow-right text-[10px]"></i></span>
+                    <h3 class="text-xl font-bold mb-3 text-[#0f172a] relative z-10">ISO 국제 인증</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed font-light relative z-10">품질, 환경, 안전 보건 등 국제적 표준 시스템을 구축하여 대내외 신뢰를 높입니다.</p>
                 </div>
 
-                <div onclick="openModal('eco')" class="service-card p-12 rounded-[2.5rem] cursor-pointer reveal" style="transition-delay: 0.1s">
-                    <div class="w-12 h-12 text-blue-600 mb-10">
+                <!-- 환경표지 -->
+                <div onclick="openModal('eco')" class="service-card p-8 rounded-3xl cursor-pointer reveal" style="transition-delay: 0.1s">
+                    <div class="card-watermark"><i class="fas fa-leaf"></i></div>
+                    <div class="w-10 h-10 text-blue-600 mb-6 relative z-10">
                         <i class="fas fa-leaf text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-4 text-[#0f172a]">환경표지 인증</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-10 font-light">친환경 가치를 국가가 공식 인증하여 안정적인 공공 판로를 개척합니다.</p>
-                    <span class="text-blue-600 text-xs font-bold tracking-widest uppercase flex items-center gap-2">View Detail <i class="fas fa-arrow-right text-[10px]"></i></span>
+                    <h3 class="text-xl font-bold mb-3 text-[#0f172a] relative z-10">환경표지 인증</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed font-light relative z-10">친환경 가치를 인증받아 공공기관 의무구매 대상 등 안정적 판로를 개척합니다.</p>
                 </div>
             </div>
         </div>
@@ -255,7 +334,7 @@
                             <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Interest Area</label>
                             <div class="relative">
                                 <select id="subject" class="w-full px-7 py-5 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none font-medium appearance-none cursor-pointer">
-                                    <option>분야를 선택해 주세요</option>
+                                    <option value="">분야를 선택해 주세요</option>
                                     <option>메인비즈 / 이노비즈</option>
                                     <option>벤처기업확인</option>
                                     <option>기업부설연구소</option>
@@ -297,23 +376,25 @@
                         <span>대표 <b>박종선</b></span>
                         <span class="text-blue-600 font-bold tracking-wider">사업자번호 190-30-00426</span>
                     </div>
-                    <p class="opacity-70">경기도 성남시 분당구 정자일로 177 A동 1211호</p>
+                    <p class="opacity-70">경기도 성남시 분당구 정자일로 177 A동 1211호 (인텔리지II)</p>
                     <p class="text-slate-300 mt-8 uppercase tracking-[0.4em] text-[9px] font-bold">© 2017-2026 JS CERTIFICATION INSTITUTE</p>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Service Modal -->
+    <!-- Modal -->
     <div id="service-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
         <div class="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl">
-            <div id="modal-header" class="px-10 py-10 border-b border-slate-100 flex justify-between items-center bg-white">
-                <h3 id="modal-title" class="text-2xl font-bold text-[#0f172a]"></h3>
-                <button onclick="closeModal()" class="text-2xl text-slate-300 hover:text-slate-600 transition-colors">&times;</button>
+            <div id="modal-header" class="px-10 py-12 border-b border-slate-100 flex justify-between items-center bg-white">
+                <h3 id="modal-title" class="text-2xl font-bold text-[#0f172a] tracking-tight"></h3>
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-300 hover:text-slate-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
             <div id="modal-body" class="p-10 max-h-[65vh] overflow-y-auto custom-scrollbar"></div>
             <div class="p-8 border-t border-slate-50 flex justify-center">
-                <button onclick="closeModal()" class="bg-[#0f172a] text-white px-14 py-3.5 rounded-xl font-bold text-sm hover:bg-black transition">닫기</button>
+                <button onclick="closeModal()" class="bg-[#0f172a] text-white px-14 py-3.5 rounded-xl font-bold text-sm hover:bg-black transition shadow-lg">닫기</button>
             </div>
         </div>
     </div>
@@ -321,6 +402,24 @@
     <script>
         const apiKey = ""; 
         (function() { emailjs.init("MF2y2eXILifq-imbo"); })();
+
+        function showAlert(message, type = 'success') {
+            const alertBox = document.getElementById('custom-alert');
+            const alertMsg = document.getElementById('alert-message');
+            const alertIcon = document.getElementById('alert-icon');
+            alertMsg.innerText = message;
+            if (type === 'error') {
+                alertIcon.className = "w-10 h-10 rounded-full flex items-center justify-center bg-red-50 text-red-600";
+                alertIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+            } else {
+                alertIcon.className = "w-10 h-10 rounded-full flex items-center justify-center bg-blue-50 text-blue-600";
+                alertIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            }
+            alertBox.style.display = 'flex';
+            setTimeout(() => hideAlert(), 4000);
+        }
+
+        function hideAlert() { document.getElementById('custom-alert').style.display = 'none'; }
 
         function toggleAIConsult() {
             const container = document.getElementById('ai-consult-container');
@@ -332,215 +431,136 @@
         const serviceData = {
             mainbiz: {
                 title: "메인비즈 (Main-Biz)",
-                content: `
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-search"></i> 개요</div>
-                        <ul class="info-list">
-                            <li>중소벤처기업부에서 경영혁신 역량을 갖춘 중소기업을 발굴하여 인증하는 제도입니다.</li>
-                            <li>비기술 분야(마케팅, 조직관리, 생산공정 등)의 혁신을 통해 경쟁력을 확보한 기업을 의미합니다.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-check-circle"></i> 요건</div>
-                        <ul class="info-list">
-                            <li>업력: 설립 후 만 3년 이상 정상 가동 중인 중소기업.</li>
-                            <li>점수: 온라인 자가진단 600점 이상 및 현장평가 700점(1,000점 만점) 이상 획득.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-layer-group"></i> 절차</div>
-                        <ul class="info-list">
-                            <li>1. 온라인 기업 등록 및 자가진단 실시.</li>
-                            <li>2. 현장평가 신청 및 수수료 납부.</li>
-                            <li>3. 평가기관(신보, 기술보증기금 등)의 현장실사.</li>
-                            <li>4. 중기부 인증서 발급.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-award"></i> 혜택</div>
-                        <ul class="info-list">
-                            <li>정기 세무조사 3년 유예 및 국세청 우대.</li>
-                            <li>금융권 대출 금리 우대 및 신용보증기금 보증료율 감면.</li>
-                            <li>정부 조달 적격심사 가점 부여 및 판로 개척 지원.</li>
-                        </ul>
-                    </div>
-                `
+                content: `<div class="info-section"><div class="info-title"><i class="fas fa-info-circle"></i> 1. 개요</div><ul class="info-list"><li><strong>정의:</strong> 중소벤처기업부가 인증하는 경영혁신형 중소기업 제도</li><li><strong>핵심:</strong> 마케팅, 조직관리, 업무 프로세스 등 비기술 분야의 경영 혁신 활동을 중점적으로 평가</li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-check-circle"></i> 2. 신청 요건</div><ul class="info-list"><li><strong>대상 기업:</strong> 신청일 기준 업력 3년 이상인 정상 가동 중인 중소기업</li><li><strong>평가 기준:</strong><ul class="sub-list"><li>온라인 자가진단(600점 이상 / 1,000점 만점)</li><li>현장평가(700점 이상 / 1,000점 만점) 통과</li></ul></li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-layer-group"></i> 3. 인증 절차</div><ul class="info-list"><li><strong>신청:</strong> 메인비즈넷 온라인 접수 및 기업 기본 정보 등록</li><li><strong>자가진단:</strong> 경영혁신지표에 따른 기업 자체 평가 실시</li><li><strong>현장평가:</strong> 한국생산성본부 등 전문 평가기관의 실사 대응</li><li><strong>인증서 발급:</strong> 지방중소벤처기업청의 최종 심사 및 승인</li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-award"></i> 4. 주요 혜택</div><ul class="info-list"><li><strong>금융/세제 지원:</strong><ul class="sub-list"><li>신용보증기금 보증료율 우대 및 시중은행 금리 우대</li><li>정기 세무조사 3년 유예 및 관세조사 유예</li></ul></li><li><strong>판로/인력:</strong><ul class="sub-list"><li>TV/라디오 광고비 70% 할인 지원</li><li>병역지정업체 선정 및 연구인력 파견 우대</li></ul></li></ul></div>`
             },
             innobiz: {
                 title: "이노비즈 (Inno-Biz)",
-                content: `
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-search"></i> 개요</div>
-                        <ul class="info-list">
-                            <li>기술 우위를 바탕으로 경쟁력을 확보한 '기술혁신형 중소기업'임을 국가가 공식 인증하는 제도입니다.</li>
-                            <li>지속적인 R&D 투자를 통해 미래 성장 가능성이 높은 글로벌 강소기업 육성을 목적으로 합니다.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-check-circle"></i> 요건</div>
-                        <ul class="info-list">
-                            <li>업력: 설립 후 만 3년 이상인 중소기업.</li>
-                            <li>점수: 기술혁신 시스템 평가지표 700점 이상 및 개별 기술평가 등급 B 이상.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-layer-group"></i> 절차</div>
-                        <ul class="info-list">
-                            <li>1. 이노비즈넷 온라인 자가진단(신청서 작성).</li>
-                            <li>2. 기술보증기금의 현장 기술평가 진행.</li>
-                            <li>3. 평가 결과 검토 및 중기부 최종 선정.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-award"></i> 혜택</div>
-                        <ul class="info-list">
-                            <li>금융: 보증료 감면(0.2%p) 및 보증 한도 우대 확대.</li>
-                            <li>특허: 특허청 우선심사 대상 지정 및 특허료 감면.</li>
-                            <li>R&D: 국가 연구과제 신청 시 가점 및 병역특례 업체 선정 우대.</li>
-                        </ul>
-                    </div>
-                `
+                content: `<div class="info-section"><div class="info-title"><i class="fas fa-info-circle"></i> 1. 개요</div><ul class="info-list"><li><strong>정의:</strong> 중소벤처기업부가 인증하는 기술혁신형 중소기업 제도</li><li><strong>핵심:</strong> 지속적인 R&D를 통해 기술 경쟁력을 확보한 미래 성장 가능성 높은 기업 평가</li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-check-circle"></i> 2. 신청 요건</div><ul class="info-list"><li><strong>대상 기업:</strong> 신청일 기준 업력 3년 이상인 기술력 보유 중소기업</li><li><strong>평가 기준:</strong><ul class="sub-list"><li>기술혁신 시스템 평가(700점 이상)</li><li>개별 기술평가 등급 B등급 이상 확보</li></ul></li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-layer-group"></i> 3. 인증 절차</div><ul class="info-list"><li><strong>신청:</strong> 이노비즈넷 온라인 자가진단서 작성</li><li><strong>실사:</strong> 기술보증기금(KIBO)의 전문 인력 현장 평가</li><li><strong>확정:</strong> 중소벤처기업부 인증서 발급</li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-award"></i> 4. 주요 혜택</div><ul class="info-list"><li><strong>금융/R&D:</strong><ul class="sub-list"><li>기술보증기금 보증료 0.2%p 감면 및 보증한도 우대</li><li>정부 R&D 과제 신청 시 가점 및 병역특례 우대</li></ul></li></ul></div>`
             },
             venture: {
                 title: "벤처기업 확인",
-                content: `
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-search"></i> 개요</div>
-                        <ul class="info-list">
-                            <li>기술의 혁신성과 사업의 성장성이 우수한 기업을 발굴하여 '벤처기업'으로 확인해 주는 제도입니다.</li>
-                            <li>2021년부터 민간 주도의 확인 체계로 개편되어 실질적인 성장 가능성을 중점적으로 평가합니다.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-check-circle"></i> 요건</div>
-                        <ul class="info-list">
-                            <li>유형 1(벤처투자): 벤처캐피탈 등으로부터 5천만원 이상 투자 유치.</li>
-                            <li>유형 2(연구개발): 기업부설연구소 보유 및 연간 연구개발비 5천만원 이상.</li>
-                            <li>유형 3(혁신성장): 기술의 혁신성과 사업의 성장성에 대한 전문 평가 통과.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-layer-group"></i> 절차</div>
-                        <ul class="info-list">
-                            <li>1. 벤처확인종합관리시스템 온라인 신청.</li>
-                            <li>2. 전문 평가기관(기술보증기금, 중진공 등) 현장 실사.</li>
-                            <li>3. 벤처기업확인위원회(민간) 최종 심의.</li>
-                        </ul>
-                    </div>
-                    <div class="info-section">
-                        <div class="info-title"><i class="fas fa-award"></i> 혜택</div>
-                        <ul class="info-list">
-                            <li>세제: 창업 3년 이내 벤처기업 법인세/소득세 50% 감면(5년간).</li>
-                            <li>취득: 부동산 취득세 75% 감면 및 재산세 면제/감면.</li>
-                            <li>인력: 전문연구요원 제도 활용 및 코스닥 상장 심사 우대.</li>
-                        </ul>
-                    </div>
-                `
+                content: `<div class="info-section"><div class="info-title"><i class="fas fa-info-circle"></i> 1. 개요</div><ul class="info-list"><li><strong>정의:</strong> 기술 혁신성과 사업 성장성이 우수한 기업을 발굴하여 국가가 공인하는 제도</li><li><strong>핵심:</strong> 2021년 민간 주도 체계로 개편되어 실질적 성장 가치를 평가</li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-check-circle"></i> 2. 신청 요건</div><ul class="info-list"><li><strong>유형:</strong> 벤처투자유형, 연구개발유형, 혁신성장유형 중 택 1</li><li><strong>특징:</strong> 초기 스타트업도 기술력과 계획만으로 신청 가능</li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-layer-group"></i> 3. 인증 절차</div><ul class="info-list"><li><strong>신청:</strong> 벤처확인종합관리시스템 온라인 접수</li><li><strong>실사:</strong> 기술보증기금, 중진공 등 유형별 전문기관 실사</li><li><strong>심의:</strong> 벤처기업확인위원회 최종 심의 및 확인</li></ul></div><div class="info-section"><div class="info-title"><i class="fas fa-award"></i> 4. 주요 혜택</div><ul class="info-list"><li><strong>세제/금융:</strong><ul class="sub-list"><li>법인세/소득세 50% 감면(창업 3년 내 확인 시, 5년간)</li><li>부동산 취득세 75% 감면 및 재산세 50% 감면</li><li>코스닥 상장 심사 우대 및 자금 조달 가점</li></ul></li></ul></div>`
             },
             lab: {
-                title: "기업부설연구소 / 연구개발전담부서",
+                title: "기업부설연구소 / 전담부서",
                 content: `
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-search"></i> 개요</div>
+                        <div class="info-title"><i class="fas fa-info-circle"></i> 1. 개요</div>
                         <ul class="info-list">
-                            <li>기업 내 독립된 연구 공간과 전문 인력을 확보하여 연구개발 활동을 수행함을 신고하여 인정받는 제도입니다.</li>
-                            <li>한국산업기술진흥협회(KOITA)를 통해 국가에서 공식 인정받습니다.</li>
+                            <li><strong>정의:</strong> 일정 요건을 갖춘 기업의 연구개발 전담조직을 신고하여 인정받는 제도</li>
+                            <li><strong>목적:</strong> 연구소 설립을 통해 기업의 기술개발 역량을 강화하고 국가 경쟁력을 확보함</li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-check-circle"></i> 요건</div>
+                        <div class="info-title"><i class="fas fa-check-circle"></i> 2. 신청 요건</div>
                         <ul class="info-list">
-                            <li>인적 요건: 소기업 2~3인, 중기업 5인 이상의 연구전담요원 확보.</li>
-                            <li>물적 요건: 사방이 막힌 독립된 연구 공간(벽체 구분) 및 출입문 설치.</li>
+                            <li><strong>인적 요건:</strong> 기업 규모별 상이 (소기업 3명 이상, 중기업 5명 이상 연구전담요원 확보)
+                                <ul class="sub-list">
+                                    <li>창업 3년 미만 소기업은 2명 이상으로 완화 적용</li>
+                                    <li>전담부서는 기업 규모와 상관없이 전담요원 1명 이상</li>
+                                </ul>
+                            </li>
+                            <li><strong>물적 요건:</strong> 타 부서와 구분된 독립 연구 공간 및 연구 기자재 보유
+                                <ul class="sub-list">
+                                    <li>파티션 등에 의한 구분 가능 (소기업 및 지식서비스업 등 예외 적용)</li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-layer-group"></i> 절차</div>
+                        <div class="info-title"><i class="fas fa-layer-group"></i> 3. 인증 절차</div>
                         <ul class="info-list">
-                            <li>1. 신고 요건(인력, 공간) 구비.</li>
-                            <li>2. 연구개발 활동 개요 및 관련 서류 준비.</li>
-                            <li>3. KOITA 온라인 신고 및 심사 진행.</li>
-                            <li>4. 연구소 인정서 발급 및 사후 관리.</li>
+                            <li><strong>준비:</strong> 인력 요건 확인 및 증빙 사진/도면 준비</li>
+                            <li><strong>신고:</strong> 한국산업기술진흥협회(KOITA) 온라인 시스템 접수</li>
+                            <li><strong>검토:</strong> 협회의 서류 심사 및 보완 과정 (필요시 현장 실사)</li>
+                            <li><strong>발급:</strong> 최종 요건 확인 후 '기업부설연구소 인정서' 발급</li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-award"></i> 혜택</div>
+                        <div class="info-title"><i class="fas fa-award"></i> 4. 주요 혜택</div>
                         <ul class="info-list">
-                            <li>연구/인력 개발비 세액공제: 당해 연도 발생 비용의 25% 법인세 공제(강력 추천).</li>
-                            <li>관세: 연구용 기자재 수입 시 관세 80% 감면 혜택.</li>
-                            <li>정부 R&D 참여 자격 확보 및 병역특례 업체 지정 필수 조건.</li>
+                            <li><strong>조세 지원:</strong> 연구 및 인력개발비 25% 세액공제 (강력한 절세 효과)</li>
+                            <li><strong>관세/기타:</strong> 연구용 기자재 수입 시 관세 80% 감면</li>
+                            <li><strong>정부 지원:</strong> 국가 R&D 사업 참여 시 필수 요건 및 가점 부여</li>
+                            <li><strong>병역 특례:</strong> 전문연구요원 제도 병역지정업체 선정 자격 부여</li>
                         </ul>
-                    </div>
-                `
+                    </div>`
             },
             iso: {
-                title: "ISO 국제 표준 인증 (9001, 14001, 45001)",
+                title: "ISO 국제 표준 인증 (9001/14001/45001)",
                 content: `
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-search"></i> 개요</div>
+                        <div class="info-title"><i class="fas fa-info-circle"></i> 1. 개요</div>
                         <ul class="info-list">
-                            <li>국제 표준화 기구(ISO)에서 제정한 품질/환경/안전 보건 경영 시스템 규격에 따라 기업 운영이 적합함을 인증하는 제도입니다.</li>
+                            <li><strong>정의:</strong> 국제표준화기구에서 제정한 품질/환경/안전 보건 경영시스템의 국제 표준</li>
+                            <li><strong>종류:</strong> 
+                                <ul class="sub-list">
+                                    <li>ISO 9001: 품질경영시스템 (고객 만족 및 품질 유지)</li>
+                                    <li>ISO 14001: 환경경영시스템 (지속 가능한 환경 관리)</li>
+                                    <li>ISO 45001: 안전보건경영시스템 (사업장 위험 방지)</li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-check-circle"></i> 요건</div>
+                        <div class="info-title"><i class="fas fa-check-circle"></i> 2. 신청 요건</div>
                         <ul class="info-list">
-                            <li>규격별 경영 매뉴얼 및 절차서 구축 여부.</li>
-                            <li>최소 3개월 이상의 운영 실적 및 내부 심사, 경영 검토 기록 보유.</li>
+                            <li><strong>운영 기록:</strong> 규격에 따른 경영 시스템 구축 및 최소 3개월 이상의 운영 실적 보유</li>
+                            <li><strong>내부 심사:</strong> 사후 관리 및 내부 심사, 경영 검토 프로세스 완료</li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-layer-group"></i> 절차</div>
+                        <div class="info-title"><i class="fas fa-layer-group"></i> 3. 인증 절차</div>
                         <ul class="info-list">
-                            <li>1. 경영 시스템 구축 및 문서화(매뉴얼, 절차서).</li>
-                            <li>2. 내부 심사를 통한 시정 조치 완료.</li>
-                            <li>3. 인증기관 1단계(문서) 및 2단계(현장) 심사.</li>
-                            <li>4. 인증서 발행 및 연 1회 사후 심사.</li>
+                            <li><strong>진단/구축:</strong> 현황 분석 및 인증 매뉴얼, 절차서 작성</li>
+                            <li><strong>심사 신청:</strong> 공인 인증기관을 통한 심사 예약</li>
+                            <li><strong>심사 진행:</strong> 1단계 문서심사 및 2단계 현장실사 대응</li>
+                            <li><strong>인증 발행:</strong> 부적합 사항 시정 후 최종 인증서 발급</li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-award"></i> 혜택</div>
+                        <div class="info-title"><i class="fas fa-award"></i> 4. 주요 혜택</div>
                         <ul class="info-list">
-                            <li>기업 신뢰도 향상 및 글로벌 무역 시 필수 신용 정보.</li>
-                            <li>대기업 협력업체 등록 및 공공입찰 가점 부여.</li>
-                            <li>체계적인 업무 매뉴얼화를 통한 효율 증가 및 불량률 감소.</li>
+                            <li><strong>대외 신인도:</strong> 글로벌 무역 시 필수 요건 및 기업 브랜드 이미지 강화</li>
+                            <li><strong>공공 입찰:</strong> 조달청 입찰 및 적격심사 시 가점 부여</li>
+                            <li><strong>운영 효율:</strong> 품질 관리 시스템 체계화를 통한 비용 절감 및 생산성 향상</li>
                         </ul>
-                    </div>
-                `
+                    </div>`
             },
             eco: {
                 title: "환경표지 인증 (에코마크)",
                 content: `
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-search"></i> 개요</div>
+                        <div class="info-title"><i class="fas fa-info-circle"></i> 1. 개요</div>
                         <ul class="info-list">
-                            <li>제품의 전 과정에서 환경 오염을 줄이고 자원을 절약한 제품에 대해 국가가 공식 인증하여 에코마크를 부여하는 제도입니다.</li>
+                            <li><strong>정의:</strong> 제품 전 과정에서 환경 부하를 줄인 제품에 부여하는 국가 공인 친환경 인증</li>
+                            <li><strong>주관:</strong> 한국환경산업기술원(KEITI)</li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-check-circle"></i> 요건</div>
+                        <div class="info-title"><i class="fas fa-check-circle"></i> 2. 신청 요건</div>
                         <ul class="info-list">
-                            <li>대상 품목별 환경 기준(자원순환, 에너지 절약 등) 및 품질 기준 충족.</li>
-                            <li>공인 시험 기관의 시험 성적서 확보 및 제조 현장 심사 통과.</li>
+                            <li><strong>대상 확인:</strong> 인증 대상 품목군(사무용기기, 가구, 건축자재 등) 해당 여부</li>
+                            <li><strong>성적서 확보:</strong> 공인 시험기관의 환경성 및 품질 기준 만족 성적서 보유</li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-layer-group"></i> 절차</div>
+                        <div class="info-title"><i class="fas fa-layer-group"></i> 3. 인증 절차</div>
                         <ul class="info-list">
-                            <li>1. 대상 제품 선정 및 인증 기준 확인.</li>
-                            <li>2. 한국환경산업기술원(KEITI) 온라인 신청 및 현장 실사.</li>
-                            <li>3. 최종 심의 및 인증서 교부.</li>
+                            <li><strong>접수:</strong> 환경표지 인증 신청 시스템 온라인 접수</li>
+                            <li><strong>현장 실사:</strong> 심사원의 제조 현장 실사 및 시료 채취</li>
+                            <li><strong>시험 분석:</strong> 국가 공인 기관의 기준 적합성 판단 및 데이터 검증</li>
+                            <li><strong>발급:</strong> 심의위원회 최종 의결을 거쳐 인증서 교부</li>
                         </ul>
                     </div>
                     <div class="info-section">
-                        <div class="info-title"><i class="fas fa-award"></i> 혜택</div>
+                        <div class="info-title"><i class="fas fa-award"></i> 4. 주요 혜택</div>
                         <ul class="info-list">
-                            <li>공공기관 의무 구매 대상 품목 지정으로 판로 확보 용이.</li>
-                            <li>조달청 입찰 가점 및 적격심사 시 우대 혜택.</li>
-                            <li>친환경 브랜드 이미지 제고 및 정부 포상 후보 선정.</li>
+                            <li><strong>공공 판로:</strong> 녹색제품 구매 촉진법에 따른 공공기관 의무구매 대상 품목 지정</li>
+                            <li><strong>조달 우대:</strong> 조달청 MAS 적격심사 가점 및 다수공급자계약 시 유리</li>
+                            <li><strong>브랜드 가치:</strong> 정부 주관 친환경 로고 사용을 통한 소비자 신뢰 확보</li>
                         </ul>
-                    </div>
-                `
+                    </div>`
             }
         };
 
@@ -561,26 +581,29 @@
         }
 
         const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
-            });
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
         }, { threshold: 0.1 });
         document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
         async function fetchGemini(query) {
             const sys = "당신은 한국의 기업 인증 전문가입니다. 명확하고 품격 있게 답변하세요.";
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: query }] }],
-                        systemInstruction: { parts: [{ text: sys }] }
-                    })
-                });
-                const data = await res.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text;
-            } catch (e) { throw e; }
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const fetchWithRetry = async (retries = 5, delay = 1000) => {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: query }] }], systemInstruction: { parts: [{ text: sys }] } })
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (e) {
+                    if (retries > 0) { await new Promise(r => setTimeout(r, delay)); return fetchWithRetry(retries - 1, delay * 2); }
+                    throw e;
+                }
+            };
+            return fetchWithRetry();
         }
 
         async function handleAISubmit() {
@@ -588,28 +611,23 @@
             const hist = document.getElementById('chat-history');
             const query = input.value.trim();
             if (!query) return;
-
             const userDiv = document.createElement('div');
             userDiv.className = 'flex justify-end';
-            userDiv.innerHTML = `<div class='bg-[#0f172a] px-6 py-4 rounded-3xl rounded-tr-none text-white font-medium shadow-sm max-w-[85%] text-sm'>${query}</div>`;
+            userDiv.innerHTML = `<div class='bg-blue-600 px-6 py-4 rounded-3xl rounded-tr-none text-white font-medium shadow-sm max-w-[85%] text-sm'>${query}</div>`;
             hist.appendChild(userDiv);
             input.value = '';
-
             const loadId = 'ai-' + Date.now();
             const aiDiv = document.createElement('div');
             aiDiv.className = 'flex justify-start';
-            aiDiv.innerHTML = `<div id='${loadId}' class='bg-slate-100 px-6 py-5 rounded-3xl rounded-tl-none border border-slate-100 max-w-[85%] text-slate-500 text-sm'>분석 데이터를 생성하고 있습니다...</div>`;
+            aiDiv.innerHTML = `<div id='${loadId}' class='bg-slate-100 px-6 py-5 rounded-3xl rounded-tl-none border border-slate-100 max-w-[85%] text-slate-500 text-sm'>데이터를 분석하고 있습니다...</div>`;
             hist.appendChild(aiDiv);
             hist.scrollTop = hist.scrollHeight;
-
             try {
                 const ans = await fetchGemini(query);
                 const el = document.getElementById(loadId);
                 el.innerText = ans;
                 el.classList.replace('text-slate-500', 'text-slate-700');
-            } catch {
-                document.getElementById(loadId).innerText = "연결 상태를 확인해 주십시오.";
-            }
+            } catch { document.getElementById(loadId).innerText = "연결 상태를 확인해 주십시오."; }
             hist.scrollTop = hist.scrollHeight;
         }
 
@@ -618,27 +636,13 @@
             const btn = document.getElementById('submit-btn');
             btn.innerText = "전송 중...";
             btn.disabled = true;
-
-            const params = {
-                from_name: document.getElementById('name').value,
-                contact_number: document.getElementById('phone').value,
-                reply_email: document.getElementById('reply_email').value,
-                interest_service: document.getElementById('subject').value,
-                message: document.getElementById('message').value
-            };
-
+            const params = { from_name: document.getElementById('name').value, contact_number: document.getElementById('phone').value, interest_service: document.getElementById('subject').value, message: document.getElementById('message').value };
             emailjs.send('jscert', 'template_m90odbf', params)
-                .then(() => {
-                    alert('성공적으로 상담 신청이 접수되었습니다.');
-                    this.reset();
-                    btn.innerText = "상담 신청하기";
-                    btn.disabled = false;
-                }).catch(() => {
-                    alert('오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
-                    btn.disabled = false;
-                    btn.innerText = "상담 신청하기";
-                });
+                .then(() => { showAlert('성공적으로 상담 신청이 접수되었습니다.'); this.reset(); btn.innerText = "상담 신청하기"; btn.disabled = false; })
+                .catch(() => { showAlert('오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error'); btn.disabled = false; btn.innerText = "상담 신청하기"; });
         };
+
+        document.getElementById('ai-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAISubmit(); });
     </script>
 </body>
 </html>
