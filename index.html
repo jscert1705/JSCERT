@@ -34,6 +34,30 @@
             background-color: var(--brand-navy);
             position: relative;
             overflow: hidden;
+            /* 기하학적 패턴 제거 후 깊이감을 위한 아주 은은한 그라데이션만 유지 */
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        /* 반짝이는 별 효과 */
+        .sparkle-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sparkle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            filter: blur(1px);
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.6; transform: scale(1.2); }
         }
 
         /* 명함 스타일의 거대 기울어진 로고 워터마크 */
@@ -46,7 +70,7 @@
             max-width: 1000px;
             opacity: 0.04;
             pointer-events: none;
-            z-index: 0;
+            z-index: 2;
         }
 
         .reveal { 
@@ -68,7 +92,7 @@
             max-height: 1000px; 
         }
 
-        /* 서비스 카드 디자인 - 워터마크 추가 버전 */
+        /* 서비스 카드 디자인 */
         .service-card {
             transition: all 0.3s ease;
             border: 1px solid #f1f5f9;
@@ -77,7 +101,7 @@
             flex-direction: column;
             align-items: flex-start;
             position: relative;
-            overflow: hidden; /* 워터마크가 카드 밖으로 나가지 않도록 설정 */
+            overflow: hidden;
         }
         .service-card:hover {
             border-color: var(--brand-blue);
@@ -85,7 +109,6 @@
             box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.08);
         }
 
-        /* 카드 내부 워터마크 스타일 */
         .card-watermark {
             position: absolute;
             bottom: -10%;
@@ -106,7 +129,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        /* 모달 스타일 상세화 */
         .info-section { margin-bottom: 2.5rem; }
         .info-title { font-weight: 700; font-size: 1.15rem; color: var(--brand-navy); margin-bottom: 1.2rem; border-bottom: 2px solid var(--brand-blue); padding-bottom: 0.6rem; display: flex; align-items: center; gap: 10px; width: fit-content; }
         .info-title i { color: var(--brand-blue); font-size: 1rem; }
@@ -171,6 +193,9 @@
 
     <!-- Hero Section -->
     <section class="min-h-screen flex items-center justify-center pt-20 hero-dark">
+        <!-- Sparkle Effect Overlay -->
+        <div id="sparkle-container" class="sparkle-container"></div>
+        
         <div class="bg-watermark">
             <svg viewBox="0 0 100 100" class="w-full h-full">
                 <path d="M35 25 V60 C35 72 25 72 20 68" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
@@ -310,7 +335,7 @@
         <div class="max-w-4xl mx-auto px-6">
             <div class="text-center mb-24 reveal">
                 <h2 class="text-4xl font-bold text-[#0f172a] mb-6 tracking-tight">상담 신청</h2>
-                <p class="text-slate-400 text-lg font-light leading-relaxed max-w-xl mx-auto">전담 컨설턴트가 상세한 내용을 확인한 후 24시간 이내에 신속하게 회신 드리겠습니다.</p>
+                <p class="text-slate-400 text-lg font-light leading-relaxed max-w-xl mx-auto">전담 컨설턴트가 내용을 확인한 후 신속하게 회신 드리겠습니다.</p>
             </div>
 
             <div class="bg-white p-10 md:p-20 rounded-[3.5rem] border border-slate-100 shadow-sm reveal">
@@ -347,7 +372,7 @@
                     </div>
                     <div class="space-y-3">
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Message</label>
-                        <textarea id="message" rows="5" class="w-full px-7 py-5 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none font-medium resize-none transition-all" placeholder="문의 사항을 구체적으로 기재해 주십시오."></textarea>
+                        <textarea id="message" rows="5" class="w-full px-7 py-5 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none font-medium resize-none transition-all" placeholder="문의 사항을 기재해 주십시오."></textarea>
                     </div>
                     <button type="submit" id="submit-btn" class="w-full bg-[#0f172a] text-white py-6 rounded-2xl font-bold text-lg hover:bg-black transition shadow-lg">
                         상담 신청하기
@@ -373,7 +398,7 @@
                 </div>
                 <div class="text-sm font-medium text-slate-500 space-y-2">
                     <div class="flex flex-wrap justify-center md:justify-start gap-x-8">
-                        <span>대표 <b>박종선</b></span>
+                        <span>대표자 <b>박종선</b></span>
                         <span class="text-blue-600 font-bold tracking-wider">사업자번호 190-30-00426</span>
                     </div>
                     <p class="opacity-70">경기도 성남시 분당구 정자일로 177 A동 1211호 (인텔리지II)</p>
@@ -402,6 +427,39 @@
     <script>
         const apiKey = ""; 
         (function() { emailjs.init("MF2y2eXILifq-imbo"); })();
+
+        // 별 생성 스크립트
+        function createSparkles() {
+            const container = document.getElementById('sparkle-container');
+            const count = 50; // 별의 개수
+            
+            for (let i = 0; i < count; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                // 랜덤 위치
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                
+                // 랜덤 크기 및 애니메이션 지속 시간
+                const size = Math.random() * 3 + 1;
+                const duration = Math.random() * 3 + 2;
+                const delay = Math.random() * 5;
+                
+                sparkle.style.left = `${x}%`;
+                sparkle.style.top = `${y}%`;
+                sparkle.style.width = `${size}px`;
+                sparkle.style.height = `${size}px`;
+                sparkle.style.setProperty('--duration', `${duration}s`);
+                sparkle.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(sparkle);
+            }
+        }
+
+        window.onload = function() {
+            createSparkles();
+        };
 
         function showAlert(message, type = 'success') {
             const alertBox = document.getElementById('custom-alert');
